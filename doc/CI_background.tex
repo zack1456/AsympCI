@@ -1,0 +1,208 @@
+\documentclass[10pt]{article}
+\topmargin 0.4in
+\textheight 8.7in
+\textwidth 6.8in
+\parindent 0.25in
+\itemindent 0.in
+\leftmargin 0.5in
+\hoffset -0.8in
+\voffset -0.4in
+
+
+\author{WCT}
+
+\date{\today}
+
+\title{Effects of Model Parameterization on the Computation of Confidence Intervals\\
+\large WORKING DOCUMENT}
+
+% ### ### ### ### ### ### ### ### %
+%Custom packages
+\usepackage{graphicx}
+\usepackage[mathcal,mathscr]{eucal}
+\usepackage{amsfonts, amsmath, amsthm, amssymb}
+% ### ### ### ### ### ### ### ### %
+
+% ### ### ### ### ### ### ### ### %
+%Custom commands
+\newcommand{\submin}{_{\mathrm{min}}}
+\newcommand{\submax}{_{\mathrm{max}}}
+\newcommand{\vecnorm}[1]{\left|\left|#1\right|\right|}
+\newcommand{\dd}[2]{\frac{d #1}{d #2}}
+\newcommand{\ddt}[1]{\frac{d #1}{dt}}
+\newcommand{\ddx}[1]{\frac{d #1}{dx}}
+\newcommand{\pd}[2]{\frac{\partial #1}{\partial #2}}
+\newcommand{\pdx}[1]{\displaystyle \frac{\partial #1}{\partial x}}
+\newcommand{\pdy}[1]{\displaystyle \frac{\partial #1}{\partial y}}
+\newcommand{\pdz}[1]{\displaystyle \frac{\partial #1}{\partial z}}
+\newcommand{\pdt}[1]{\displaystyle \frac{\partial #1}{\partial t}}
+\newcommand{\pdd}[2]{\frac{\partial^2 #1}{{\partial #2}^2}}
+\newcommand{\pddx}[1]{\frac{\partial^2 #1}{{\partial x}^2}}
+\newcommand{\pddt}[1]{\frac{\partial^2 #1}{{\partial t}^2}}
+\newcommand{\dtwod}[2]{\frac{d^2 #1}{d {#2}^2}}
+\newcommand{\eref}[1]{Eq.~\ref{#1}}
+\newcommand{\fref}[1]{Figure~\ref{#1}}
+\newcommand{\tref}[1]{Table~\ref{#1}}
+% ### ### ### ### ### ### ### ### %
+
+
+
+\begin{document}
+\maketitle
+% ### Start Document ### %
+\emph{Right now, this document just contains a summary of the theory underlying confidence interval computation.  Eventually, this theory is going to be used to discuss the effects of model parameterizations on CI computation...}\\
+
+\vspace{0.3in}
+
+
+\section{Notation}
+
+The purpose of this document is to provide a brief overview of the results necessary for the computation of confidence intervals.  Assume one has a mathematical model $f(t;\theta)$ and noisy observations of that process,
+\begin{equation*}
+Y_{k} = f(t_{k};\theta^{*}) + \mathcal{E}_{k}
+\end{equation*}
+where $\theta^{*} \in Q \subset \mathbb{R}^{p}$ is the hypothetical true value of the model parameter and the $\mathcal{E}_{k}$ are independent error random variables satisfying $E[\mathcal{E}_{k}] = 0$ and $Var(\mathcal{E}_{k}) = \sigma^{2}$.  Then the ordinary least squares (OLS) cost functional is
+\begin{equation*}
+J(\theta) = \sum_{k=1}^{n} \left(Y_{k} - f(t_{k};\theta)\right)^{2},
+\end{equation*}
+and the corresponding OLS estimator is
+\begin{equation*}
+\hat{\theta} = \arg \min_{\theta\in \Theta} J(\theta).
+\end{equation*}
+For notational convenience, we can define $\vec{Y} = (Y_{1},\ldots,Y_{n})^{T}$, $\vec{\mathcal{E}} = (\mathcal{E}_{1},\ldots,\mathcal{E}_{n})^{T}$, and $\vec{f}(\theta) = (f(t_{1};\theta),\ldots,f(t_{n};\theta))^{T}$.  Then
+\begin{equation}\label{eq:ols_cost_vec}
+J(\theta) = \vecnorm{\vec{Y} - \vec{f}(\theta)}_{2}^{2}.
+\end{equation}
+
+
+
+\section{Asymptotic Confidence Ellipsoid}
+
+Let $\chi$ be the sensitivity matrices as defined in \cite{BanksTran}.  Then the following statements are true \cite[Sec. 1.3]{Gallant}:
+\begin{itemize}
+\item $\hat{\theta} \sim \mathcal{N}(\theta^{*},\sigma^{2}(\chi^{T}\chi)^{-1})$
+\item The quantity $J(\hat{\theta})/(n-p)$ is an unbiased estimator for $\sigma^{2}$.
+\item Define $Q_{1} = J(\hat{q})/\sigma^{2}$.  Then $Q_{1} \sim \chi^{2}_{n-p}$, a Chi-square distribution with $n-p$ degrees of freedom.
+\end{itemize}
+[\emph{In actual fact, there are several subtle issues which need to be addressed here.  They are extremely tedious so I am avoiding them right now.  For instance, I am deliberately being vague about the differences between estimates and estimators.  Also, the sensitivity matrices $\chi$ are only approximations to the actual quantities of interest.  The references \cite{BanksFitzpatrick,Gallant} have most of the details.  Alternatively, \cite{SeberLee} has proofs for the linear case, and they are a lot more readable.  For now, lets just take these statements at face value.}]
+
+Define the quantity
+\begin{equation*}
+Q_{2} = (\hat{\theta} - \theta^{*})^{T}\chi^{T}\chi(\hat{\theta} - \theta^{*})/\sigma^{2}.
+\end{equation*}
+It can be shown \cite[Thm. 2.9]{SeberLee} that $Q_{2} \sim \chi^{2}_{p}$.  [Intuitive proof: the $\chi^{2}_{p}$ distribution is defined the be the distribution which occurs when $p$ standard normal random variables are squared and added together.  In the expression above, $\hat{\theta}$ is normally distributed.  We subtract its mean and rescale by its variance to get standard normal, and then the matrix algebra squares and sums the results.]  Now, define
+\begin{equation}\label{eq:F_def}
+F = \frac{(\hat{\theta} - \theta^{*})^{T}\chi^{T}\chi(\hat{\theta} - \theta^{*})}{ps^{2}}
+\end{equation}
+where $s^{2} = J(\hat{\theta})/(n-p)$.  Then
+\begin{align*}
+F & = \left(\frac{(\hat{\theta} - \theta^{*})^{T}\chi^{T}\chi(\hat{\theta} - \theta^{*})}{J(\hat{\theta})}\right)\left(\frac{n-p}{p}\right)\\
+	& = \left(\frac{(\hat{\theta} - \theta^{*})^{T}\chi^{T}\chi(\hat{\theta} - \theta^{*})}{J(\hat{\theta})}\right)\left(\frac{n-p}{p}\right)\left(\frac{\sigma^{2}}{\sigma^{2}}\right)\\
+& = \frac{Q_{2}/p}{Q_{1}/(n-p)}.
+\end{align*}
+In both the numerator and denominator we have a Chi-squared distribution which is scaled by its number of degrees of freedom.  This is, by definition, the F-distribution.  Thus
+\begin{equation}\label{eq:F_dist}
+F = \frac{(\hat{\theta} - \theta^{*})^{T}\chi^{T}\chi(\hat{\theta} - \theta^{*})}{ps^{2}} \sim F_{p,n-p}.
+\end{equation}
+It follows that an approximate $(1-\alpha)$ confidence interval is
+\begin{equation}\label{eq:ellipsoid1}
+\left\{\theta \Big| (\theta - \hat{\theta})^{T}\chi^{T}\chi(\theta - \hat{\theta}) \leq ps^{2}F_{p,n-p}^{\alpha}\right\}
+\end{equation}
+where $F_{p,n-p}^{\alpha}$ is the upper-$\alpha$ critical value of the $F_{p,n-p}$ distribution.  This is the \emph{asymptotic confidence ellipsoid} for the for the OLS estimator.
+
+
+
+\section{Exact Confidence Ellipsoid}
+
+By linearizing \eqref{eq:ols_cost_vec}, we obtain
+\begin{align}
+J(\theta) & = \vecnorm{\vec{Y} - \vec{f}(\theta)}_{2}^{2}\nonumber\\
+	& \approx \vecnorm{\vec{Y} - \vec{f}(\theta^{*}) - \chi(\theta - \theta^{*})}_{2}^{2}\nonumber\\
+	& = \vecnorm{\vec{Z} - \chi\beta}_{2}^{2},\label{eq:ols_cost_linearized}
+\end{align}
+where $\vec{Z}$ and $\beta$ have the obvious definitions.  The equation \eqref{eq:ols_cost_linearized} is now a linear least squares problem and thus has solution
+\begin{equation}\label{eq:lin_soln}
+\hat{\beta} = \left(\chi^{T}\chi\right)^{-1}\chi^{T}\vec{Z},
+\end{equation}
+provided the inverse exists.  (If the $n \times p$ matrix $\chi$ has full rank $p$, then the $p \times p$ matrix $\chi^{T}\chi$ also has rank $p$ and thus is invertible.  If this condition does not hold, a generalized inverse can be used \cite[Appendix D1.5]{SeberWild}, although the theory underlying the use of generalized inverse seems quite suspect....)  If $\hat{\theta}$ is close to $\theta^{*}$ (which it will be under appropriate conditions; see \cite{BanksFitzpatrick,Gallant,Jennrich1969,SeberWild}) then $\vec{Z} \approx \vec{R} \equiv \vec{Y} - \vec{f}(\theta^{*})$ (the residuals for the linearized problem are approximately equal to the residuals for the nonlinear problem) and $\hat{\beta} \approx \hat{\theta} - \theta^{*}$ (the linear estimator is close to the difference between the OLS estimator and the true parameter value).  Substituting these approximations into \eqref{eq:lin_soln},
+\begin{equation}\label{eq:forward_error}
+\hat{\theta} - \theta^{*} \approx (\chi^{T}\chi)^{-1}\chi^{T}\vec{R}.
+\end{equation}
+Note also that
+\begin{align}
+f(\hat{\theta}) - f(\theta^{*}) & \approx \chi(\hat{\theta} - \theta^{*})\nonumber\\
+	& \approx \chi(\chi^{T}\chi)^{-1}\chi^{T}\vec{R}\nonumber\\
+	& = P\vec{R},\label{eq:f_lin}
+\end{align}
+where we have linearized around $\theta^{*}$ and used \eqref{eq:forward_error}, and defined the operator $P = \chi(\chi^{T}\chi)^{-1}\chi^{T}$.  It can easily be verified that $P$ is symmetric and idempotent (that is, $P^{2} = P$).  Hence
+\begin{align}
+\vecnorm{f(\hat{\theta}) - f(\theta^{*})}_{2}^{2} & = \vec{R}^{T} P^{T} P \vec{R}\nonumber\\
+	& = \vec{R}^{T} P^{2} \vec{R}\nonumber\\
+	& = \vec{R}^{T} P \vec{R}.\label{eq:f_diff1}
+\end{align}
+Alternatively, we can use the first step in obtaining \eqref{eq:f_lin} above to obtain
+\begin{equation}\label{eq:f_diff2}
+\vecnorm{f(\hat{\theta}) - f(\theta^{*})}_{2}^{2} = (\hat{\theta} - \theta^{*})^{T}\chi^{T}\chi(\hat{\theta} - \theta^{*}).
+\end{equation}
+By the same linearization, the definition of the residuals $\vec{R}$, and \eqref{eq:forward_error} again,
+\begin{align*}
+\vec{Y} - \vec{f}(\hat{\theta}) & \approx \vec{Y} - \vec{f}(\theta^{*}) - \chi(\hat{\theta} - \theta^{*})\\
+	& \approx \vec{R} - \chi(\chi^{T}\chi)^{-1}\chi^{T}\vec{R}\\
+	& = (I - P)\vec{R}.
+\end{align*}
+It is easily verified that $(I-P)$ is also symmetric and idempotent.  Hence,
+\begin{align}
+J(\hat{\theta}) & = \vecnorm{\vec{Y} - f(\hat{\theta})}_{2}^{2}\nonumber\\
+	& \approx \vec{R}^{T}(I-P)^{T}(I-P)\vec{R}\nonumber\\
+	& = \vec{R}^{T}(I-P)^{2}\vec{R}\nonumber\\
+	& = \vec{R}(I-P)\vec{R}.\label{eq:jhat_appx}
+\end{align}
+From \eqref{eq:jhat_appx} and the definition of $\vec{R}$ it follows that
+\begin{align}
+J(\theta^{*}) - J(\hat{\theta}) & \approx \vec{R}^{T}\vec{R} - \vec{R}(I-P)\vec{R}\nonumber\\
+	& = \vec{R}^{T} P \vec{R}.\label{eq:j_diff}
+\end{align}
+Combining \eqref{eq:f_diff1}, \eqref{eq:f_diff2}, and \eqref{eq:j_diff}
+\begin{equation*}
+J(\theta^{*}) - J(\hat{\theta}) \approx \vec{R}^{T} P \vec{R} \approx \vecnorm{f(\hat{\theta}) - f(\theta^{*})}_{2}^{2} \approx (\hat{\theta} - \theta^{*})^{T}\chi^{T}\chi(\hat{\theta} - \theta^{*}).
+\end{equation*}
+Finally, it follows from \eqref{eq:F_dist} that
+\begin{equation*}
+\frac{J(\theta^{*}) - J(\hat{\theta})}{ps^{2}} \approx F \sim F^{p,n-p}
+\end{equation*}
+so that an approximate $(1-\alpha)$ confidence interval is
+\begin{equation}\label{eq:exact_CI}
+\left\{\theta \Big| J(\theta) \leq J(\hat{\theta})\left(1 + \frac{p}{n-p}F_{p,n-p}^{\alpha}\right)\right\}
+\end{equation}
+where $F_{p,n-p}^{\alpha}$ is again the upper-$\alpha$ critical value of the $F_{p,n-p}$ distribution.  Equation \eqref{eq:exact_CI} is the \emph{exact confidence ellipsoid} \cite[Sec. 3.3.1]{SeberWild} for the OLS estimator.
+
+Asymptotically (that is, in the limit as $n \to \infty$, in which case $\hat{\theta} \to \theta^{*}$ under appropriate conditions) the linearizations used in the presentation above are exact and the exact and asymptotic confidence intervals are the same.  In practice, the computation of the exact confidence interval is independent of the linearization (hence its name).  Unfortunately, the exact confidence intervals can be very difficult to compute for high-dimensional problems.
+
+
+
+% ### End Document ### %
+
+
+
+
+
+
+
+\begin{thebibliography}{99}
+
+\bibitem{BanksFitzpatrick} H.T. Banks and B.G. Fitzpatrick, Statistical methods for model comparison in parameter estimation problems for distributed systems, \emph{J. Math. Biol.} \textbf{28} (1990), 501--527.
+
+\bibitem{BanksTran} H.T. Banks and H.T. Tran, \emph{Mathematical and Experimental Modeling of Physical and Biological Processes}, CRC Press, Boca Raton London New York, 2009.
+
+\bibitem{Gallant} A.R. Gallant, \emph{Nonlinear Statistical Models}, Wiley, New York, 1987.
+
+\bibitem{Jennrich1969} R.I. Jennrich, Asymptotic properties of non-linear least squares estimators, \emph{Annals of Mathematical Statistics} \textbf{40} (1969), 633--643.
+
+\bibitem{SeberLee} G.A.F. Seber and A.J. Lee, \emph{Linear Regression Analysis}, Wiley, Hoboken, 2003.
+
+\bibitem{SeberWild} G.A. Seber and C.J. Wild, \emph{Nonlinear Regression}, Wiley, Hoboken, 2003. 
+
+\end{thebibliography}
+% ### ### ### ### ### ### ### ### %
+
+\end{document}
